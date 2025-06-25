@@ -14,9 +14,15 @@ import (
 )
 
 func main() {
+	// Initialize datastore, cache
 	ds := store.NewStore()
 	c := store.NewCache(30 * time.Second)
+
 	r := transport.NewRouter(ds, c)
+
+	//Auth middleware
+	authorizedKey := "someSecretApiKey"
+	r.Use(transport.AuthMiddleware(authorizedKey))
 
 	srv := &http.Server{
 		Addr:         "0.0.0.0:8080",

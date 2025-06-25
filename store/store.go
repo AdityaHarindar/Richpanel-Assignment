@@ -55,6 +55,7 @@ func (ds *DataStore) Create(p model.Post) (int, error) {
 		ID:        id,
 		Title:     p.Title,
 		Author:    p.Author,
+		Body:      p.Body,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
