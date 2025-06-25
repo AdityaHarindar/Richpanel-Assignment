@@ -1,0 +1,46 @@
+Richpanel-Assignment
+System Design: high-level system architecture for a URL shortener service
+
+Components:
+1. Load Balancer:
+    Clients send create/redirect requests to Global/Regional LBs that route and distribute traffic to API servers
+2. API server:
+        Write Flow:
+            Authenticate and Validate URL to be shortened
+            Generate unique short url key, based on some encoding/hashing mechanism (b62, md5)
+            Commit long -> short mapping to persistent storage
+            Return full shortened url
+
+        Read Flow:
+            Lookup short url from cache/storage
+            Return redirect response to long url
+3. Cache:
+        In memory distributed cache, holds mappings from short->long urls
+4. Persistent Storage:
+        Primary data store for cache, holds meta information too and not just mappings
+5. Key-Generation:
+        Unique keys
+        Hash url + salt (some entropy source)
+        MD5/base62 + distributed counter
+6. Asynchronous Logging
+7. Monitoring (Prometheus, Grafana Dashboards)
+
+
+
+High Scale (>10K RPS)
+1. Horizontal Scaling:
+        Spawn api server instances using load metrics
+        Scale up DB read replicas based on read load
+        Scale up DB writes based on write load
+2. Read through caching, high TTL for popular URLs
+3. CDN for edge based caching for multi region deployments
+4. Asynchronous analytics events, buffer to prevent analytics from being the bottleneck
+
+Data Storage:
+1. Cache: Redis/Memcached
+2. SQL/NoSQL data store depending on consistency requirements
+
+Bottlenecks:
+1. Write key bottleneck: Pre-generate short keys --  ahead of time approach
+2. Thundering herd problem:  Pre cache popular URLs, degrade least recently used keys
+3. Single point of failure for key generation counters, create multiple keygens, sync via apache zookeeper
