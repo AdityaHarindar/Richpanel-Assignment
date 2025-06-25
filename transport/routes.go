@@ -16,5 +16,6 @@ func NewRouter(s store.Store, c store.Cache) *mux.Router {
 	r.HandleFunc("/posts/{key}", GetHandler(s)).Methods(http.MethodGet)
 	r.HandleFunc("/posts/{key}", PutHandler(s)).Methods(http.MethodPut)
 	r.HandleFunc("/posts/{key}", DeleteHandler(s)).Methods(http.MethodDelete)
+	r.HandleFunc("/health", HealthCheckHandler)
 	return r
 }
