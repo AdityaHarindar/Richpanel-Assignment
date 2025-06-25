@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// Cache is an interface for a KV cache layer
 type Cache interface {
 	Get(key string) ([]byte, bool)
 	Set(key string, val []byte)
@@ -22,6 +23,7 @@ type CacheStore struct {
 	ttl  time.Duration
 }
 
+// NewCache accepts the intended cache TTL, returns a pointer to a new CacheStore
 func NewCache(ttl time.Duration) *CacheStore {
 	return &CacheStore{
 		data: make(map[string]cacheObject),
@@ -29,6 +31,7 @@ func NewCache(ttl time.Duration) *CacheStore {
 	}
 }
 
+// Get accepts a cache key and returns the cache response, true/false for cache HIT/MISS
 func (c *CacheStore) Get(key string) ([]byte, bool) {
 	c.mu.RLock()
 	item, ok := c.data[key]
@@ -39,12 +42,14 @@ func (c *CacheStore) Get(key string) ([]byte, bool) {
 	return item.bytes, true
 }
 
+// Set accepts a cache key/value and writes it to a cache store
 func (c *CacheStore) Set(key string, val []byte) {
 	c.mu.Lock()
 	c.data[key] = cacheObject{bytes: val, expires: time.Now().Add(c.ttl)}
 	c.mu.Unlock()
 }
 
+// InvalidateAll clears the entire cache
 func (c *CacheStore) InvalidateAll() {
 	c.mu.Lock()
 	c.data = make(map[string]cacheObject)

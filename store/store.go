@@ -9,6 +9,7 @@ import (
 	"github.com/AdityaHarindar/Richpanel-Assignment/model"
 )
 
+// Store is an interface for the in memory data store, which can be replaced by other data stores/DBs
 type Store interface {
 	Create(post model.Post) (int, error)
 	GetByID(id int) model.Post
@@ -22,11 +23,13 @@ type DataStore struct {
 	mu sync.RWMutex
 }
 
+// NewStore returns a pointer to a new in-memory data store
 func NewStore() *DataStore {
 	ds := make(map[int]model.Post)
 	return &DataStore{ds: ds, mu: sync.RWMutex{}}
 }
 
+// Create adds a post to the data store and returns post id, error
 func (ds *DataStore) Create(p model.Post) (int, error) {
 	// Validations
 	if len(p.Title) < 1 {
@@ -64,6 +67,7 @@ func (ds *DataStore) Create(p model.Post) (int, error) {
 
 }
 
+// GetByID accepts a post ID and returns the post contents
 func (ds *DataStore) GetByID(id int) model.Post {
 	// checks
 	if id < 1 {
@@ -83,6 +87,7 @@ func (ds *DataStore) GetByID(id int) model.Post {
 	return post
 }
 
+// GetAll accepts a limit/offset, returns a list of posts
 func (ds *DataStore) GetAll(limit, offset int) ([]model.Post, error) {
 	// RLock the shared data store
 	ds.mu.RLock()
@@ -110,6 +115,7 @@ func (ds *DataStore) GetAll(limit, offset int) ([]model.Post, error) {
 	return posts[offset:end], nil
 }
 
+// Update accepts post ID, updated post contents, and returns the updated post, error
 func (ds *DataStore) Update(id int, p model.Post) (model.Post, error) {
 	// Validations
 	if len(p.Title) < 1 {
@@ -136,6 +142,7 @@ func (ds *DataStore) Update(id int, p model.Post) (model.Post, error) {
 	}
 }
 
+// Delete accepts a post ID and returns true if the deletion is successful
 func (ds *DataStore) Delete(id int) bool {
 	_, exists := ds.ds[id]
 	if !exists {

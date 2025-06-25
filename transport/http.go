@@ -105,7 +105,7 @@ func PostHandler(s store.Store, c store.Cache) http.HandlerFunc {
 	}
 }
 
-func PutHandler(s store.Store) http.HandlerFunc {
+func PutHandler(s store.Store, c store.Cache) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		var post model.Post
 		err := json.NewDecoder(request.Body).Decode(&post)
@@ -129,6 +129,7 @@ func PutHandler(s store.Store) http.HandlerFunc {
 			writer.WriteHeader(http.StatusBadRequest)
 			return
 		}
+		c.InvalidateAll()
 
 		// Encode and Write response
 		post = s.GetByID(id)
@@ -142,7 +143,7 @@ func PutHandler(s store.Store) http.HandlerFunc {
 	}
 }
 
-func DeleteHandler(s store.Store) http.HandlerFunc {
+func DeleteHandler(s store.Store, c store.Cache) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		// Get ID from request URL
 		vars := mux.Vars(request)
@@ -154,6 +155,7 @@ func DeleteHandler(s store.Store) http.HandlerFunc {
 
 		if s.Delete(id) {
 			//	deleted successfully
+			c.InvalidateAll()
 			writer.WriteHeader(http.StatusAccepted)
 		} else {
 			http.Error(writer, "Unable to delete/Not Found", http.StatusNoContent)

@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// AuthMiddleware is an authentication middleware that checks if the API key in the header is authorized
 func AuthMiddleware(expectedKey string) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
